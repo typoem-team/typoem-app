@@ -1,0 +1,9 @@
+node_modules/
+www/
+.web-src/
+.DS_Store
+
+# Signing keys: back them up in the team drive, never commit them
+*.jks
+*.keystore
+keystore.properties

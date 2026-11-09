@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Typoem</string>
+    <string name="title_activity_main">Typoem</string>
+    <string name="package_name">com.typoem.app</string>
+    <string name="custom_url_scheme">com.typoem.app</string>
+</resources>

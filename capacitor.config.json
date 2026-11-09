@@ -1,0 +1,8 @@
+{
+  "appId": "com.typoem.app",
+  "appName": "Typoem",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": false
+  }
+}
