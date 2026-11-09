@@ -1,6 +1,6 @@
 # Typoem App
 
-Android app for [Typoem](https://github.com/typoem-team/typoem), built with [Capacitor](https://capacitorjs.com/).
+Android app for [Typoem](https://github.com/typoem-team/typoem-web), built with [Capacitor](https://capacitorjs.com/).
 The app shows the same screens as the web (`public/` in the web repo) and talks to the server at
 `https://typoem-app.onrender.com`.
 
@@ -19,11 +19,11 @@ Needs Node 20+, Android Studio, and JDK 21.
 
 ```bash
 npm install
-npm run sync      # clones typoem-team/typoem (main) and copies its screens
+npm run sync      # clones typoem-team/typoem-web (main) and copies its screens
 npm run open      # opens Android Studio → Run ▶ on a phone or emulator
 ```
 
-Use a local web checkout instead of cloning: `WEB_DIR=../typoem npm run sync`
+Use a local web checkout instead of cloning: `WEB_DIR=../typoem-web npm run sync`
 (or `npm run sync:local` when the web repo sits next to this one).
 Use another branch of the web repo: `WEB_REF=my-branch npm run sync`.
 

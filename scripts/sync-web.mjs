@@ -4,8 +4,8 @@
  * and adds app-shell.js as the first script on every page.
  *
  * Where the web code comes from:
- *   WEB_DIR=../typoem npm run sync     use a local checkout of the web repo
- *   npm run sync                       clone typoem-team/typoem (branch WEB_REF, default main)
+ *   WEB_DIR=../typoem-web npm run sync use a local checkout of the web repo
+ *   npm run sync                       clone typoem-team/typoem-web (branch WEB_REF, default main)
  */
 import { execFileSync } from 'node:child_process';
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -13,7 +13,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const WEB_REPO = process.env.WEB_REPO || 'https://github.com/typoem-team/typoem.git';
+const WEB_REPO = process.env.WEB_REPO || 'https://github.com/typoem-team/typoem-web.git';
 const WEB_REF = process.env.WEB_REF || 'main';
 const outDir = join(root, 'www');
 

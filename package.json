@@ -4,7 +4,7 @@
   "description": "Typoem Android app (Capacitor wrapper around the Typoem web screens)",
   "scripts": {
     "sync": "node scripts/sync-web.mjs && cap sync android",
-    "sync:local": "WEB_DIR=../typoem node scripts/sync-web.mjs && cap sync android",
+    "sync:local": "WEB_DIR=../typoem-web node scripts/sync-web.mjs && cap sync android",
     "open": "cap open android"
   },
   "repository": {
