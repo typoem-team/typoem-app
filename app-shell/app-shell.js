@@ -24,6 +24,42 @@
 
   var nativeFetch = window.fetch.bind(window);
 
+  // ---------- share sheet ----------
+  // Android's WebView has no navigator.share, so the web's "공유하기" button would
+  // only copy the text. Route navigator.share to the phone's own share sheet
+  // (KakaoTalk, messages, ...) through the native Share plugin.
+  // The plugin object can appear a moment after this script runs, so look it up
+  // every time navigator.share is read (the web code checks it when the button is
+  // tapped). Without the plugin, navigator.share stays undefined and the web
+  // falls back to copying.
+  (function () {
+    if (typeof navigator.share === 'function') return;
+    function sharePlugin() {
+      var cap = window.Capacitor;
+      var p = cap && cap.Plugins && cap.Plugins.Share;
+      return p && typeof p.share === 'function' ? p : null;
+    }
+    function nativeShare(data) {
+      data = data || {};
+      var plugin = sharePlugin();
+      if (!plugin) return Promise.reject(new DOMException('Share is not available', 'NotSupportedError'));
+      return plugin.share({ title: data.title, text: data.text, url: data.url })
+        .then(function () { /* shared */ })
+        .catch(function (err) {
+          // The web code treats a closed sheet as AbortError, like the browser does.
+          var msg = String((err && err.message) || err || '');
+          if (/cancel/i.test(msg)) throw new DOMException('Share canceled', 'AbortError');
+          throw err;
+        });
+    }
+    try {
+      Object.defineProperty(navigator, 'share', {
+        configurable: true,
+        get: function () { return sharePlugin() ? nativeShare : undefined; }
+      });
+    } catch (e) { /* ignore: the web falls back to copying */ }
+  })();
+
   // ---------- overlay ----------
   var overlay = null;
   var slowCount = 0;
