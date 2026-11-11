@@ -13,10 +13,16 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- paper colour behind the web view, so nothing flashes white while a page loads -->
+        <item name="android:windowBackground">@color/typoem_paper</item>
     </style>
 
 
+    <!-- Launch screen: the book-cover icon in the middle of the cream paper colour
+         (the same picture as the launcher icon; see assets/book-cover.svg). -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
-        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">@color/typoem_paper</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
     </style>
 </resources>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- the paper colour: the "bg" design token of the web screens -->
+    <color name="typoem_paper">#F2EEE7</color>
+</resources>
