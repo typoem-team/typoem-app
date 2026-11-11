@@ -5,8 +5,14 @@
  * 2. Render's free plan sleeps after 15 idle minutes and takes ~1 minute to wake.
  *    Before the first API call we ping /api/health, and if any API call is slow we
  *    show a "waking up the server" screen instead of a page that looks broken.
+ * 3. Native polish, through the Capacitor plugins: status bar colours, the Android
+ *    back button, and the safe-area insets the web pages pad themselves with.
  *
- * Nothing in the web repo needs to change for this to work.
+ * Nothing in the web repo needs to change for this to work. The web pages offer
+ * two small hooks that this file uses when they are there:
+ *   window.TypoemNav.back()               close a sheet / leave the reading screen
+ *   window.TypoemNative.setStatusBar(..)  light text over a dark cover (web calls it)
+ * Haptics need nothing here: the web's haptic() calls Capacitor.Plugins.Haptics itself.
  */
 (function () {
   'use strict';
@@ -21,6 +27,7 @@
   // ---------- overlay ----------
   var overlay = null;
   var slowCount = 0;
+  var failed = false;     // the "can't reach the server" screen stays until "다시 시도"
 
   function buildOverlay() {
     var el = document.createElement('div');
@@ -30,24 +37,36 @@
     el.innerHTML =
       '<div class="tw-box">' +
         '<div class="tw-dots"><span></span><span></span><span></span></div>' +
-        '<p class="tw-title">Waking up the server…</p>' +
-        '<p class="tw-sub">This can take up to a minute.</p>' +
-        '<button type="button" class="tw-retry" hidden>Try again</button>' +
+        '<p class="tw-title">서버를 깨우는 중이에요</p>' +
+        '<p class="tw-sub">최대 1분 걸릴 수 있어요</p>' +
+        '<button type="button" class="tw-retry" hidden>다시 시도</button>' +
       '</div>';
+    // Colours and fonts are the web design tokens (styles.css), with their values as
+    // fallbacks: this screen can show before the page's stylesheet has loaded. The
+    // fonts are the files synced from the web repo (www/fonts/), so it looks the same
+    // offline.
     var style = document.createElement('style');
     style.textContent =
+      '@font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;' +
+      'src:url("/fonts/maruburi/MaruBuri-Regular.subset.woff2") format("woff2")}' +
+      '@font-face{font-family:"MaruBuri";font-weight:700;font-display:swap;' +
+      'src:url("/fonts/maruburi/MaruBuri-Bold.subset.woff2") format("woff2")}' +
       '#typoem-wake-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;' +
-      'align-items:center;justify-content:center;background:rgba(244,236,216,.94);' +
-      'font-family:"IM Fell English",Georgia,serif;color:#2b1f12;text-align:center;padding:24px}' +
-      '#typoem-wake-overlay .tw-title{font-size:20px;margin:16px 0 4px}' +
-      '#typoem-wake-overlay .tw-sub{font-size:15px;opacity:.7}' +
-      '#typoem-wake-overlay .tw-dots span{display:inline-block;width:8px;height:8px;margin:0 4px;' +
-      'border-radius:50%;background:#2b1f12;animation:tw-blink 1.2s infinite both}' +
-      '#typoem-wake-overlay .tw-dots span:nth-child(2){animation-delay:.2s}' +
-      '#typoem-wake-overlay .tw-dots span:nth-child(3){animation-delay:.4s}' +
-      '#typoem-wake-overlay .tw-retry{margin-top:16px;padding:8px 20px;font:inherit;' +
-      'background:#2b1f12;color:#f4ecd8;border:0;border-radius:4px}' +
-      '@keyframes tw-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}';
+      'align-items:center;justify-content:center;background:var(--bg,#f2eee7);' +
+      'font-family:"MaruBuri","Nanum Myeongjo","Apple SD Gothic Neo",serif;' +
+      'color:var(--ink,#1f1b16);text-align:center;padding:24px;word-break:keep-all;' +
+      '-webkit-font-smoothing:antialiased}' +
+      '#typoem-wake-overlay .tw-title{font-size:17px;font-weight:700;line-height:1.5;margin:22px 0 4px}' +
+      '#typoem-wake-overlay .tw-sub{font-size:13.5px;line-height:1.6;color:var(--ink-2,#6b6358);margin:0}' +
+      '#typoem-wake-overlay .tw-dots span{display:inline-block;width:8px;height:8px;margin:0 5px;' +
+      'border-radius:50%;background:var(--ink,#1f1b16);animation:tw-blink 1.8s cubic-bezier(.22,.61,.36,1) infinite both}' +
+      '#typoem-wake-overlay .tw-dots span:nth-child(2){animation-delay:.25s}' +
+      '#typoem-wake-overlay .tw-dots span:nth-child(3){animation-delay:.5s}' +
+      '#typoem-wake-overlay .tw-retry{margin-top:22px;min-height:48px;padding:12px 26px;font:inherit;' +
+      'font-size:14.5px;background:var(--ink,#1f1b16);color:var(--on-ink,#f4efe6);border:0;border-radius:999px}' +
+      '#typoem-wake-overlay [hidden]{display:none}' +
+      '@keyframes tw-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}' +
+      '@media (prefers-reduced-motion:reduce){#typoem-wake-overlay .tw-dots span{animation:none;opacity:.5}}';
     el.appendChild(style);
     el.querySelector('.tw-retry').addEventListener('click', function () {
       window.location.reload();
@@ -65,14 +84,16 @@
   }
 
   function hideOverlay() {
+    if (failed) return;
     if (overlay && overlay.isConnected) overlay.remove();
   }
 
   function showFailure() {
+    failed = true;
     showOverlay();
     overlay.querySelector('.tw-dots').hidden = true;
-    overlay.querySelector('.tw-title').textContent = 'Can’t reach the server.';
-    overlay.querySelector('.tw-sub').textContent = 'Check your internet connection and try again.';
+    overlay.querySelector('.tw-title').textContent = '서버에 연결하지 못했어요';
+    overlay.querySelector('.tw-sub').textContent = '인터넷 연결을 확인하고 다시 시도해 주세요';
     overlay.querySelector('.tw-retry').hidden = false;
   }
 
@@ -175,6 +196,80 @@
       }
     })());
   };
+
+  // ---------- native polish (Capacitor plugins; none of this runs in a browser) ----------
+  function plugin(name) {
+    var cap = window.Capacitor;
+    return (cap && cap.Plugins && cap.Plugins[name]) || null;
+  }
+
+  var PAPER = '#f2eee7';   // --bg
+
+  // Is the page drawn behind the status bar? Capacitor does that on a recent
+  // Android System WebView (140+), where env(safe-area-inset-top) is the bar's
+  // height. On older ones it keeps the page below the bar instead, and the strip
+  // behind the bar stays paper-coloured.
+  function drawsBehindStatusBar() {
+    if (!document.body) return false;
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;top:0;left:0;width:0;visibility:hidden;' +
+      'height:env(safe-area-inset-top,0px)';
+    document.body.appendChild(probe);
+    var h = probe.getBoundingClientRect().height;
+    probe.remove();
+    return h > 0;
+  }
+
+  // Every page starts with dark status bar icons on the paper colour. The reading
+  // screen then asks for light text itself (TypoemNative.setStatusBar('light') ->
+  // StatusBar.setStyle DARK). Light text is only readable when the dark cover band
+  // really is behind the bar, so otherwise that request is turned back into dark icons.
+  // Each page is a separate HTML file, so this runs again on every navigation.
+  function setUpStatusBar() {
+    var bar = plugin('StatusBar');
+    if (!bar) return;
+    try {
+      var setStyle = bar.setStyle.bind(bar);
+      bar.setStyle = function (options) {
+        if (options && options.style === 'DARK' && !drawsBehindStatusBar()) options = { style: 'LIGHT' };
+        return setStyle(options);
+      };
+      setStyle({ style: 'LIGHT' }).catch(function () {});                   // LIGHT = dark icons
+      bar.setBackgroundColor({ color: PAPER }).catch(function () {});       // Android 14 and older
+    } catch (e) { /* plugin missing a method on this platform */ }
+  }
+
+  // Android back button: open sheet -> reading screen to home -> leave the app.
+  // The web's TypoemNav.back() does the first two and answers whether it did anything.
+  var EXIT_PAGES = ['/', '/index.html', '/login.html', '/landing.html'];
+
+  function onBackButton(ev) {
+    var app = plugin('App');
+    if (overlay && overlay.isConnected) {          // waking / failed screen: nothing to go back to
+      if (app) app.exitApp();
+      return;
+    }
+    var nav = window.TypoemNav;
+    try {
+      if (nav && typeof nav.back === 'function' && nav.back()) return;
+    } catch (e) { /* fall through to the default */ }
+
+    if (EXIT_PAGES.indexOf(window.location.pathname) !== -1) {
+      if (app) app.exitApp();
+    } else if (ev && ev.canGoBack) {
+      window.history.back();                       // e.g. 단어장 -> the screen before it
+    } else {
+      window.location.href = '/index.html';
+    }
+  }
+
+  function setUpBackButton() {
+    var app = plugin('App');
+    if (app && app.addListener) app.addListener('backButton', onBackButton);
+  }
+
+  setUpStatusBar();
+  setUpBackButton();
 
   // Start waking the server as soon as the app opens.
   trackSlow(wakeServer());
