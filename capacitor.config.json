@@ -3,6 +3,21 @@
   "appName": "Typoem",
   "webDir": "www",
   "android": {
-    "allowMixedContent": false
+    "allowMixedContent": false,
+    "backgroundColor": "#f2eee7"
+  },
+  "backgroundColor": "#f2eee7",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0,
+      "launchAutoHide": true,
+      "backgroundColor": "#f2eee7",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "LIGHT",
+      "backgroundColor": "#f2eee7"
+    }
   }
 }

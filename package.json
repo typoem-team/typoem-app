@@ -5,7 +5,8 @@
   "scripts": {
     "sync": "node scripts/sync-web.mjs && cap sync android",
     "sync:local": "WEB_DIR=../typoem-web node scripts/sync-web.mjs && cap sync android",
-    "open": "cap open android"
+    "open": "cap open android",
+    "assets": "node scripts/build-assets.mjs"
   },
   "repository": {
     "type": "git",
@@ -18,9 +19,14 @@
   "homepage": "https://github.com/typoem-team/typoem-app#readme",
   "dependencies": {
     "@capacitor/android": "^8.6.0",
-    "@capacitor/core": "^8.6.0"
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4"
   },
   "devDependencies": {
+    "@capacitor/assets": "^4.0.0",
     "@capacitor/cli": "^8.6.0"
   },
   "private": true
