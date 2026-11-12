@@ -6,6 +6,7 @@
     "sync": "node scripts/sync-web.mjs && cap sync android",
     "sync:local": "WEB_DIR=../typoem-web node scripts/sync-web.mjs && cap sync android",
     "open": "cap open android",
+    "test": "node scripts/test-back-button.mjs",
     "assets": "node scripts/build-assets.mjs"
   },
   "repository": {
