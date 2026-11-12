@@ -3,8 +3,10 @@
  *
  * 1. Sends the web pages' relative API calls (fetch('/api/...')) to the real server.
  * 2. Render's free plan sleeps after 15 idle minutes and takes ~1 minute to wake.
- *    Before the first API call we ping /api/health, and if any API call is slow we
- *    show a "waking up the server" screen instead of a page that looks broken.
+ *    Before the first API call we ping /api/health. Only while that wake-up is slow
+ *    do we show the full "서버를 깨우는 중이에요" screen. A call that is slow on an
+ *    awake server (a dictionary lookup, a slow DB query) gets a small, non-blocking
+ *    "응답을 기다리는 중이에요" pill instead, so the page stays usable.
  * 3. Native polish, through the Capacitor plugins: status bar colours, the Android
  *    back button, and the safe-area insets the web pages pad themselves with.
  *
@@ -26,7 +28,11 @@
 
   // ---------- overlay ----------
   var overlay = null;
-  var slowCount = 0;
+  var pill = null;
+  // How many calls are slow right now, by what they are waiting for:
+  //   wake  - the server is asleep and we are pinging it awake (full screen)
+  //   reply - the server is awake but this request is taking a while (small pill)
+  var slow = { wake: 0, reply: 0 };
   var failed = false;     // the "can't reach the server" screen stays until "다시 시도"
 
   function buildOverlay() {
@@ -88,8 +94,57 @@
     if (overlay && overlay.isConnected) overlay.remove();
   }
 
+  // Small pill at the top for a slow reply from an awake server. It doesn't block
+  // taps, and the page's own loading state (e.g. a disabled button) stays visible.
+  function buildPill() {
+    var el = document.createElement('div');
+    el.id = 'typoem-wait-pill';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = '<span class="tw-dots"><span></span><span></span><span></span></span>' +
+      '<span class="tw-pill-text">응답을 기다리는 중이에요</span>';
+    var style = document.createElement('style');
+    style.textContent =
+      '#typoem-wait-pill{position:fixed;left:50%;transform:translateX(-50%);' +
+      'top:calc(env(safe-area-inset-top,0px) + 12px);z-index:2147483646;pointer-events:none;' +
+      'display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;' +
+      'background:var(--surface,#fbf9f5);color:var(--ink,#1f1b16);border:1px solid var(--hair,#e2dbcf);' +
+      'box-shadow:0 4px 16px rgba(31,27,22,.08);white-space:nowrap;' +
+      'font-family:"MaruBuri","Nanum Myeongjo","Apple SD Gothic Neo",serif;font-size:13px;line-height:1.4}' +
+      '#typoem-wait-pill .tw-dots span{display:inline-block;width:5px;height:5px;margin:0 2px;' +
+      'border-radius:50%;background:var(--ink-2,#6b6358);animation:tw-blink 1.8s cubic-bezier(.22,.61,.36,1) infinite both}' +
+      '#typoem-wait-pill .tw-dots span:nth-child(2){animation-delay:.25s}' +
+      '#typoem-wait-pill .tw-dots span:nth-child(3){animation-delay:.5s}' +
+      '@keyframes tw-blink{0%,80%,100%{opacity:.2}40%{opacity:1}}' +
+      '@media (prefers-reduced-motion:reduce){#typoem-wait-pill .tw-dots span{animation:none;opacity:.5}}';
+    el.appendChild(style);
+    return el;
+  }
+
+  function showPill() {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', render, { once: true });
+      return;
+    }
+    if (!pill) pill = buildPill();
+    if (!pill.isConnected) document.body.appendChild(pill);
+  }
+
+  function hidePill() {
+    if (pill && pill.isConnected) pill.remove();
+  }
+
+  // The wake screen wins over the pill; the failure screen wins over both.
+  function render() {
+    if (failed) { hidePill(); return; }
+    if (slow.wake > 0) { showOverlay(); hidePill(); return; }
+    hideOverlay();
+    if (slow.reply > 0) showPill(); else hidePill();
+  }
+
   function showFailure() {
     failed = true;
+    hidePill();
     showOverlay();
     overlay.querySelector('.tw-dots').hidden = true;
     overlay.querySelector('.tw-title').textContent = '서버에 연결하지 못했어요';
@@ -97,17 +152,19 @@
     overlay.querySelector('.tw-retry').hidden = false;
   }
 
-  // Show the overlay only while at least one API call has been slow.
-  function trackSlow(promise) {
+  // Show the wake screen or the pill only once a call has taken longer than
+  // SHOW_OVERLAY_AFTER_MS, so fast responses never flash anything.
+  // kind: 'wake' (waiting for the server to wake) or 'reply' (waiting for an answer).
+  function trackSlow(promise, kind) {
     var flagged = false;
     var timer = setTimeout(function () {
       flagged = true;
-      slowCount++;
-      showOverlay();
+      slow[kind]++;
+      render();
     }, SHOW_OVERLAY_AFTER_MS);
     function done() {
       clearTimeout(timer);
-      if (flagged && --slowCount === 0) hideOverlay();
+      if (flagged) { slow[kind]--; render(); }
     }
     promise.then(done, done);
     return promise;
@@ -177,24 +234,27 @@
     var apiUrl = toApiUrl(input);
     if (!apiUrl) return nativeFetch(input, init);
 
-    return trackSlow((async function () {
-      var awake = await wakeServer();
+    // The wake-up and the request itself are timed separately, so only a slow
+    // wake-up shows "서버를 깨우는 중이에요" (wakeServer() resolves at once when the
+    // server answered in the last 10 minutes).
+    return (async function () {
+      var awake = await trackSlow(wakeServer(), 'wake');
       if (!awake) {
         showFailure();
         throw new TypeError('Typoem server is not reachable');
       }
       try {
-        var res = await nativeFetch(apiUrl, init);
+        var res = await trackSlow(nativeFetch(apiUrl, init), 'reply');
         markAwake();
         return res;
       } catch (err) {
         // Server may have gone back to sleep while the app was in the background.
         wakePromise = null;
-        if (await wakeServer()) return nativeFetch(apiUrl, init);
+        if (await trackSlow(wakeServer(), 'wake')) return trackSlow(nativeFetch(apiUrl, init), 'reply');
         showFailure();
         throw err;
       }
-    })());
+    })();
   };
 
   // ---------- native polish (Capacitor plugins; none of this runs in a browser) ----------
@@ -272,5 +332,5 @@
   setUpBackButton();
 
   // Start waking the server as soon as the app opens.
-  trackSlow(wakeServer());
+  trackSlow(wakeServer(), 'wake');
 })();
