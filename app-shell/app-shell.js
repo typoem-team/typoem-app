@@ -335,9 +335,17 @@
     } catch (e) { /* plugin missing a method on this platform */ }
   }
 
-  // Android back button: open sheet -> reading screen to home -> leave the app.
+  // Android back button: open sheet -> the page's own handler -> the rule below.
   // The web's TypoemNav.back() does the first two and answers whether it did anything.
-  var EXIT_PAGES = ['/', '/index.html', '/login.html', '/landing.html'];
+  // Rule per page: 'exit' leaves the app, 'home' replaces the page with home (so the
+  // bottom tabs don't step back through each other), a path is where history.back()
+  // falls back to. Pages not listed: history.back(), or home without history.
+  // shortcut: pages are listed by path; add the web's new tab / sub pages here.
+  var BACK_RULES = {
+    '/': 'exit', '/index.html': 'exit', '/login.html': 'exit', '/landing.html': 'exit',
+    '/rooms.html': 'home', '/vocab.html': 'home', '/me.html': 'home',   // bottom tabs
+    '/settings.html': '/me.html'                                          // 나 -> 설정
+  };
 
   function onBackButton(ev) {
     var app = plugin('App');
@@ -350,12 +358,15 @@
       if (nav && typeof nav.back === 'function' && nav.back()) return;
     } catch (e) { /* fall through to the default */ }
 
-    if (EXIT_PAGES.indexOf(window.location.pathname) !== -1) {
+    var rule = BACK_RULES[window.location.pathname];
+    if (rule === 'exit') {
       if (app) app.exitApp();
+    } else if (rule === 'home') {
+      window.location.replace('/index.html');
     } else if (ev && ev.canGoBack) {
-      window.history.back();                       // e.g. 단어장 -> the screen before it
+      window.history.back();                       // e.g. 설정 -> 나, 참여 -> the screen before it
     } else {
-      window.location.href = '/index.html';
+      window.location.href = rule || '/index.html';
     }
   }
 
