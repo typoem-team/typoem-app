@@ -1,64 +1,51 @@
-# Typoem App
+# Typoem 앱
 
-Android app for [Typoem](https://github.com/typoem-team/typoem-web), built with [Capacitor](https://capacitorjs.com/).
-The app shows the same screens as the web (`public/` in the web repo) and talks to the server at
-`https://typoem-app.onrender.com`.
+[Typoem](https://github.com/typoem-team/typoem-web)의 Android 앱입니다. 친구들과 함께 매일 영어 시 한 편을 읽는 서비스를 휴대폰에서 이용할 수 있습니다.
 
-## How it works
+앱은 [Capacitor](https://capacitorjs.com/)로 만들었습니다. 화면은 웹과 같으며, 앱에서는 아래 기능을 추가로 제공합니다.
 
-- `npm run sync` copies the web repo's `public/` into `www/` and runs `cap sync android`.
-- `app-shell/app-shell.js` is added as the first script on every page. It:
-  - sends `fetch('/api/...')` calls to the Render server, so **the web code doesn't need changes**;
-  - wakes the server first (Render's free plan sleeps after 15 idle minutes) and shows a
-    "독서 공간을 준비하고 있어요" screen while it starts, with "다시 시도" if it can't be reached;
-  - sets the status bar, and handles the Android back button (see below).
-- `www/` is generated. Don't edit it; change the web repo or `app-shell/` instead.
+## 앱 전용 기능
 
-## Run it
+| 기능 | 설명 |
+|---|---|
+| 홈 화면 위젯 | 오늘의 시와 연속 읽기 기록을 홈 화면에서 보여 줍니다. |
+| 아침 알림 | 설정한 시각에 매일 오늘의 시가 도착했음을 알려 줍니다. |
+| 공유 | 초대 코드를 카카오톡 등 다른 앱으로 보냅니다. |
+| 기기 연동 | 테마에 맞춘 상태 표시줄, Android 뒤로 가기 버튼, 진동 피드백을 지원합니다. |
 
-Needs Node 20+, Android Studio, and JDK 21.
+## 빌드 방법
+
+Node.js 20 이상, Android Studio, JDK 21이 필요합니다.
 
 ```bash
 npm install
-npm run sync      # clones typoem-team/typoem-web (main) and copies its screens
-npm run open      # opens Android Studio → Run ▶ on a phone or emulator
+npm run sync      # 웹 저장소의 화면을 가져와 Android 프로젝트에 반영합니다
+npm run open      # Android Studio에서 프로젝트를 엽니다
 ```
 
-Use a local web checkout instead of cloning: `WEB_DIR=../typoem-web npm run sync`
-(or `npm run sync:local` when the web repo sits next to this one).
-Use another branch of the web repo: `WEB_REF=my-branch npm run sync`.
+Android Studio에서 실행(▶)하면 휴대폰이나 에뮬레이터에 설치됩니다.
 
-## Native bits
-
-The web pages stay plain web pages; the app adds a few things through Capacitor plugins.
-
-| What | How |
-|---|---|
-| Status bar | `@capacitor/status-bar`. Every page starts with dark icons on the paper colour (`#f2eee7`). The reading screen asks for light text over its dark cover band through the web's `window.TypoemNative.setStatusBar('light')`. Light text is only applied when the page really is drawn behind the status bar (Android System WebView 140+); on older WebViews the bar keeps its paper colour and dark icons. |
-| Back button | `@capacitor/app`. Order: an open sheet closes → the reading screen goes back to home → home leaves the app. The first two are the web's `window.TypoemNav.back()`. Other screens go back one page. |
-| Haptics | `@capacitor/haptics`. Nothing in this repo: the web's `haptic()` calls `Capacitor.Plugins.Haptics.impact({ style: 'LIGHT' })` when it exists. |
-| Launch screen | `@capacitor/splash-screen` + `res/values/styles.xml`: the book-cover icon on the paper colour. |
-
-## Icon and launch screen
-
-The source is one SVG, `assets/book-cover.svg`: a deep green book cover with spine shading, a thin
-inner frame and an italic "T" (Cormorant Garamond, converted to an outline).
+테스트는 다음 명령으로 실행합니다.
 
 ```bash
-npm run assets    # renders assets/*.png from the SVG, then writes every Android size into android/app/src/main/res/
+npm test
 ```
 
-Run it again after changing the SVG, and commit the generated files.
+## 정보
 
-## Server requirements (CORS)
+- 패키지 이름: `com.typoem.app`
+- 서버: https://typoem-app.onrender.com
+- 최소 지원 버전: Android 7.0 (API 24)
 
-The app's pages run at origin `https://localhost`, so the server must allow it:
+## 팀
 
-- `Access-Control-Allow-Origin: https://localhost`
-- allow the `Authorization` and `Content-Type` headers, and answer `OPTIONS` preflight requests
+| 이름 | 이메일 |
+| --- | --- |
+| 박소연 | amypark310@gmail.com |
+| 권시현 | sihyun0305@naver.com |
+| 이지섭 | ljseop1030@gmail.com |
+| 김경윤 | gracekim6531@naver.com |
 
-## Release notes
+## 라이선스
 
-- Package name: `com.typoem.app`. It cannot change after the first store release.
-- The signing key (`*.jks`) is never committed. Back it up in the team drive; without it we can't
-  publish updates.
+MIT License — [LICENSE](LICENSE)
