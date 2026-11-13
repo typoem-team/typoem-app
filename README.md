@@ -10,7 +10,7 @@ The app shows the same screens as the web (`public/` in the web repo) and talks 
 - `app-shell/app-shell.js` is added as the first script on every page. It:
   - sends `fetch('/api/...')` calls to the Render server, so **the web code doesn't need changes**;
   - wakes the server first (Render's free plan sleeps after 15 idle minutes) and shows a
-    "서버를 깨우는 중이에요" screen while it starts, with "다시 시도" if it can't be reached;
+    "독서 공간을 준비하고 있어요" screen while it starts, with "다시 시도" if it can't be reached;
   - sets the status bar, and handles the Android back button (see below).
 - `www/` is generated. Don't edit it; change the web repo or `app-shell/` instead.
 
