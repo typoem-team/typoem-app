@@ -4,9 +4,9 @@
  * 1. Sends the web pages' relative API calls (fetch('/api/...')) to the real server.
  * 2. Render's free plan sleeps after 15 idle minutes and takes ~1 minute to wake.
  *    Before the first API call we ping /api/health. Only while that wake-up is slow
- *    do we show the full "서버를 깨우는 중이에요" screen. A call that is slow on an
+ *    do we show the full "독서 공간을 준비하고 있어요" screen. A call that is slow on an
  *    awake server (a dictionary lookup, a slow DB query) gets a small, non-blocking
- *    "응답을 기다리는 중이에요" pill instead, so the page stays usable.
+ *    "불러오는 중이에요" pill instead, so the page stays usable.
  * 3. Native polish, through the Capacitor plugins: status bar colours, the Android
  *    back button, and the safe-area insets the web pages pad themselves with.
  *
@@ -79,8 +79,8 @@
     el.innerHTML =
       '<div class="tw-box">' +
         '<div class="tw-dots"><span></span><span></span><span></span></div>' +
-        '<p class="tw-title">서버를 깨우는 중이에요</p>' +
-        '<p class="tw-sub">최대 1분 걸릴 수 있어요</p>' +
+        '<p class="tw-title">독서 공간을 준비하고 있어요</p>' +
+        '<p class="tw-sub">처음 열 때는 1분쯤 걸릴 수 있어요</p>' +
         '<button type="button" class="tw-retry" hidden>다시 시도</button>' +
       '</div>';
     // Colours and fonts are the web design tokens (styles.css), with their values as
@@ -89,16 +89,15 @@
     // offline.
     var style = document.createElement('style');
     style.textContent =
-      '@font-face{font-family:"MaruBuri";font-weight:400;font-display:swap;' +
-      'src:url("/fonts/maruburi/MaruBuri-Regular.subset.woff2") format("woff2")}' +
-      '@font-face{font-family:"MaruBuri";font-weight:700;font-display:swap;' +
-      'src:url("/fonts/maruburi/MaruBuri-Bold.subset.woff2") format("woff2")}' +
+      // the web's Korean accent face (--font-ko-accent: status lines); it ships one weight (400)
+      '@font-face{font-family:"Typoem Myeongjo";font-weight:400;font-display:swap;' +
+      'src:url("/fonts/typoem-myeongjo/TypoemMyeongjo-Regular.subset.woff2") format("woff2")}' +
       '#typoem-wake-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;' +
       'align-items:center;justify-content:center;background:var(--bg,#ffffff);' +
-      'font-family:"MaruBuri","Nanum Myeongjo","Apple SD Gothic Neo",serif;' +
+      'font-family:"Typoem Myeongjo","Nanum Myeongjo","Apple SD Gothic Neo",serif;' +
       'color:var(--ink,#1f1b16);text-align:center;padding:24px;word-break:keep-all;' +
       '-webkit-font-smoothing:antialiased}' +
-      '#typoem-wake-overlay .tw-title{font-size:17px;font-weight:700;line-height:1.5;margin:22px 0 4px}' +
+      '#typoem-wake-overlay .tw-title{font-size:18px;font-weight:400;line-height:1.5;margin:22px 0 4px}' +
       '#typoem-wake-overlay .tw-sub{font-size:13.5px;line-height:1.6;color:var(--ink-2,#6b6358);margin:0}' +
       '#typoem-wake-overlay .tw-dots span{display:inline-block;width:8px;height:8px;margin:0 5px;' +
       'border-radius:50%;background:var(--ink,#1f1b16);animation:tw-blink 1.8s cubic-bezier(.22,.61,.36,1) infinite both}' +
@@ -138,7 +137,7 @@
     el.setAttribute('role', 'status');
     el.setAttribute('aria-live', 'polite');
     el.innerHTML = '<span class="tw-dots"><span></span><span></span><span></span></span>' +
-      '<span class="tw-pill-text">응답을 기다리는 중이에요</span>';
+      '<span class="tw-pill-text">불러오는 중이에요</span>';
     var style = document.createElement('style');
     style.textContent =
       '#typoem-wait-pill{position:fixed;left:50%;transform:translateX(-50%);' +
@@ -146,7 +145,7 @@
       'display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;' +
       'background:var(--surface,#fbf9f5);color:var(--ink,#1f1b16);border:1px solid var(--hair,#e2dbcf);' +
       'box-shadow:0 4px 16px rgba(31,27,22,.08);white-space:nowrap;' +
-      'font-family:"MaruBuri","Nanum Myeongjo","Apple SD Gothic Neo",serif;font-size:13px;line-height:1.4}' +
+      'font-family:"Typoem Myeongjo","Nanum Myeongjo","Apple SD Gothic Neo",serif;font-size:13px;line-height:1.4}' +
       '#typoem-wait-pill .tw-dots span{display:inline-block;width:5px;height:5px;margin:0 2px;' +
       'border-radius:50%;background:var(--ink-2,#6b6358);animation:tw-blink 1.8s cubic-bezier(.22,.61,.36,1) infinite both}' +
       '#typoem-wait-pill .tw-dots span:nth-child(2){animation-delay:.25s}' +
@@ -271,7 +270,7 @@
     if (!apiUrl) return nativeFetch(input, init);
 
     // The wake-up and the request itself are timed separately, so only a slow
-    // wake-up shows "서버를 깨우는 중이에요" (wakeServer() resolves at once when the
+    // wake-up shows "독서 공간을 준비하고 있어요" (wakeServer() resolves at once when the
     // server answered in the last 10 minutes).
     return (async function () {
       var awake = await trackSlow(wakeServer(), 'wake');
