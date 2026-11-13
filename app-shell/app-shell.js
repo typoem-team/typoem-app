@@ -286,6 +286,10 @@
       } catch (err) {
         // Server may have gone back to sleep while the app was in the background.
         wakePromise = null;
+        // Only reads are sent again: a write (a new memo, a saved word) may have reached the
+        // server before the connection dropped, and sending it twice would save it twice.
+        var method = String((init && init.method) || 'GET').toUpperCase();
+        if (method !== 'GET' && method !== 'HEAD') throw err;
         if (await trackSlow(wakeServer(), 'wake')) return trackSlow(nativeFetch(apiUrl, init), 'reply');
         showFailure();
         throw err;
