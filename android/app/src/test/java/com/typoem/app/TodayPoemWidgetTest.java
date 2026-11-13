@@ -36,21 +36,21 @@ public class TodayPoemWidgetTest {
 
     @Test
     public void streakSameDay() {   // gap 0
-        assertArrayEquals(new String[] {"12일째", " · 오늘 읽었어요 · 30일 배지까지 18일"}, line("2026-11-13", 12, 15, true));
-        assertArrayEquals(new String[] {"12일째", " · 오늘 아직이에요 · 30일 배지까지 18일"}, line("2026-11-13", 12, 15, false));
-        assertArrayEquals(new String[] {null, "오늘 읽고 다시 시작해요 · 3일 배지까지 3일"}, line("2026-11-13", 0, 0, false));
+        assertArrayEquals(new String[] {"12일 연속", " · 오늘 독서 완료 · 30일 배지까지 18일"}, line("2026-11-13", 12, 15, true));
+        assertArrayEquals(new String[] {"12일 연속", " · 오늘 읽기 전 · 30일 배지까지 18일"}, line("2026-11-13", 12, 15, false));
+        assertArrayEquals(new String[] {null, "오늘 시를 읽고 기록을 시작해 보세요 · 3일 배지까지 3일"}, line("2026-11-13", 0, 0, false));
     }
 
     @Test
     public void streakNextDay() {   // gap 1: read yesterday keeps it, not read yesterday drops it
-        assertArrayEquals(new String[] {"12일째", " · 오늘 아직이에요 · 30일 배지까지 18일"}, line("2026-11-12", 12, 15, true));
-        assertArrayEquals(new String[] {null, "오늘 읽고 다시 시작해요 · 30일 배지까지 30일"}, line("2026-11-12", 12, 15, false));
+        assertArrayEquals(new String[] {"12일 연속", " · 오늘 읽기 전 · 30일 배지까지 18일"}, line("2026-11-12", 12, 15, true));
+        assertArrayEquals(new String[] {null, "오늘 시를 읽고 기록을 시작해 보세요 · 30일 배지까지 30일"}, line("2026-11-12", 12, 15, false));
     }
 
     @Test
     public void streakTwoDaysLater() {   // gap 2: back to 0, longest stays as saved
-        assertArrayEquals(new String[] {null, "오늘 읽고 다시 시작해요 · 30일 배지까지 30일"}, line("2026-11-11", 12, 15, true));
-        assertArrayEquals(new String[] {null, "오늘 읽고 다시 시작해요 · 30일 배지까지 30일"}, line("2026-11-11", 12, 15, false));
+        assertArrayEquals(new String[] {null, "오늘 시를 읽고 기록을 시작해 보세요 · 30일 배지까지 30일"}, line("2026-11-11", 12, 15, true));
+        assertArrayEquals(new String[] {null, "오늘 시를 읽고 기록을 시작해 보세요 · 30일 배지까지 30일"}, line("2026-11-11", 12, 15, false));
     }
 
     @Test
@@ -66,15 +66,15 @@ public class TodayPoemWidgetTest {
 
     @Test
     public void noBadgePartOnceAllEarned() {
-        assertArrayEquals(new String[] {"31일째", " · 오늘 읽었어요"}, line("2026-11-13", 31, 31, true));
+        assertArrayEquals(new String[] {"31일 연속", " · 오늘 독서 완료"}, line("2026-11-13", 31, 31, true));
     }
 
     @Test
     public void badgeDroppedFirstWhenNarrow() {
         String[] narrow = TodayPoemWidget.streakLine("2026-11-13", "2026-11-13", 12, 15, true, 250);
-        assertArrayEquals(new String[] {"12일째", " · 오늘 읽었어요"}, narrow);
+        assertArrayEquals(new String[] {"12일 연속", " · 오늘 독서 완료"}, narrow);
         String[] wide = TodayPoemWidget.streakLine("2026-11-13", "2026-11-13", 12, 15, true, 340);
-        assertArrayEquals(new String[] {"12일째", " · 오늘 읽었어요 · 30일 배지까지 18일"}, wide);
+        assertArrayEquals(new String[] {"12일 연속", " · 오늘 독서 완료 · 30일 배지까지 18일"}, wide);
     }
 
     @Test

@@ -19,7 +19,7 @@ import java.util.TimeZone;
 /**
  * Home screen widget "오늘의 시": today's poem and the reading streak as the web
  * last sent them (TypoemWidgetPlugin). A poem from another day, or none yet, shows
- * "Typoem을 열면 오늘의 시가 와요" instead. Dates are checked on every draw, and the
+ * "Typoem을 열어 오늘의 시를 만나 보세요" instead. Dates are checked on every draw, and the
  * system redraws every 30 minutes (updatePeriodMillis), so the widget catches up
  * within half an hour after midnight in Seoul.
  */
@@ -92,7 +92,7 @@ public class TodayPoemWidget extends AppWidgetProvider {
     }
 
     /**
-     * The streak line as { "12일째" or null, the rest }, for a streak the web saved on
+     * The streak line as { "12일 연속" or null, the rest }, for a streak the web saved on
      * savedDate, seen on today. The badge part is left out when it doesn't fit widthDp
      * (the widget's width; 0 = unknown).
      */
@@ -102,8 +102,8 @@ public class TodayPoemWidget extends AppWidgetProvider {
         // gap 1: read yesterday keeps the streak alive. gap < 0 (phone date moved back): as saved.
         int n = gap <= 0 || (gap == 1 && checkedInToday) ? current : 0;
         boolean readToday = gap <= 0 && checkedInToday;
-        String count = n >= 1 ? n + "일째" : null;
-        String rest = n >= 1 ? (readToday ? " · 오늘 읽었어요" : " · 오늘 아직이에요") : "오늘 읽고 다시 시작해요";
+        String count = n >= 1 ? n + "일 연속" : null;
+        String rest = n >= 1 ? (readToday ? " · 오늘 독서 완료" : " · 오늘 읽기 전") : "오늘 시를 읽고 기록을 시작해 보세요";
         int goal = nextBadge(longest);
         if (goal > n) {
             String badge = " · " + goal + "일 배지까지 " + (goal - n) + "일";
