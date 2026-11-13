@@ -18,8 +18,8 @@
     </style>
 
 
-    <!-- Launch screen: the book-cover icon in the middle of the cream paper colour
-         (the same picture as the launcher icon; see assets/book-cover.svg). -->
+    <!-- Launch screen: the app icon tile (pen-written T) in the middle of the app background
+         (the same picture as the launcher icon; see assets/app-icon*.png, npm run assets). -->
     <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/typoem_paper</item>
         <item name="windowSplashScreenAnimatedIcon">@drawable/splash_icon</item>
