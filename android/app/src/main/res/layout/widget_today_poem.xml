@@ -77,7 +77,7 @@
         android:textSize="14sp"
         android:visibility="gone" />
 
-    <!-- streak line at the bottom: "12일째" in ink, the rest in ink-2 -->
+    <!-- streak line at the bottom: "12일 연속" in ink, the rest in ink-2 -->
     <LinearLayout
         android:id="@+id/widget_streak"
         android:layout_width="match_parent"

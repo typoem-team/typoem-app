@@ -6,5 +6,5 @@
     <string name="custom_url_scheme">com.typoem.app</string>
     <string name="widget_name">오늘의 시</string>
     <string name="widget_label">TODAY\'S POEM</string>
-    <string name="widget_empty">Typoem을 열면 오늘의 시가 와요</string>
+    <string name="widget_empty">Typoem을 열어 오늘의 시를 만나 보세요</string>
 </resources>
