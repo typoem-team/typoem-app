@@ -15,6 +15,10 @@
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_typoem",
+      "iconColor": "#28383c"
+    },
     "StatusBar": {
       "style": "LIGHT",
       "backgroundColor": "#ffffff"
