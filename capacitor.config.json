@@ -4,20 +4,20 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#f2eee7"
+    "backgroundColor": "#ffffff"
   },
-  "backgroundColor": "#f2eee7",
+  "backgroundColor": "#ffffff",
   "plugins": {
     "SplashScreen": {
       "launchShowDuration": 0,
       "launchAutoHide": true,
-      "backgroundColor": "#f2eee7",
+      "backgroundColor": "#ffffff",
       "androidScaleType": "CENTER_CROP",
       "showSpinner": false
     },
     "StatusBar": {
       "style": "LIGHT",
-      "backgroundColor": "#f2eee7"
+      "backgroundColor": "#ffffff"
     }
   }
 }

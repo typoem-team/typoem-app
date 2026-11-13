@@ -94,7 +94,7 @@
       '@font-face{font-family:"MaruBuri";font-weight:700;font-display:swap;' +
       'src:url("/fonts/maruburi/MaruBuri-Bold.subset.woff2") format("woff2")}' +
       '#typoem-wake-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;' +
-      'align-items:center;justify-content:center;background:var(--bg,#f2eee7);' +
+      'align-items:center;justify-content:center;background:var(--bg,#ffffff);' +
       'font-family:"MaruBuri","Nanum Myeongjo","Apple SD Gothic Neo",serif;' +
       'color:var(--ink,#1f1b16);text-align:center;padding:24px;word-break:keep-all;' +
       '-webkit-font-smoothing:antialiased}' +
@@ -299,7 +299,17 @@
     return (cap && cap.Plugins && cap.Plugins[name]) || null;
   }
 
-  var PAPER = '#f2eee7';   // --bg
+  var PAPER = '#ffffff';   // --bg (시안 C). Dark theme: the page's own --bg, see pageColor()
+
+  // The web's theme.js sets <html data-theme>; TypoemTheme.isDark() covers '기기 설정' too.
+  function isDarkTheme() {
+    return !!(window.TypoemTheme && window.TypoemTheme.isDark && window.TypoemTheme.isDark());
+  }
+  function pageColor() {
+    var bg = '';
+    try { bg = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim(); } catch (e) { /* below */ }
+    return /^#[0-9a-f]{6}$/i.test(bg) ? bg : (isDarkTheme() ? '#161e20' : PAPER);
+  }
 
   // Is the page drawn behind the status bar? Capacitor does that on a recent
   // Android System WebView (140+), where env(safe-area-inset-top) is the bar's
@@ -327,11 +337,12 @@
     try {
       var setStyle = bar.setStyle.bind(bar);
       bar.setStyle = function (options) {
-        if (options && options.style === 'DARK' && !drawsBehindStatusBar()) options = { style: 'LIGHT' };
+        if (isDarkTheme()) options = { style: 'DARK' };                     // dark page: always light text
+        else if (options && options.style === 'DARK' && !drawsBehindStatusBar()) options = { style: 'LIGHT' };
         return setStyle(options);
       };
-      setStyle({ style: 'LIGHT' }).catch(function () {});                   // LIGHT = dark icons
-      bar.setBackgroundColor({ color: PAPER }).catch(function () {});       // Android 14 and older
+      setStyle({ style: isDarkTheme() ? 'DARK' : 'LIGHT' }).catch(function () {});   // LIGHT = dark icons
+      bar.setBackgroundColor({ color: pageColor() }).catch(function () {});        // Android 14 and older
     } catch (e) { /* plugin missing a method on this platform */ }
   }
 
@@ -375,8 +386,27 @@
     if (app && app.addListener) app.addListener('backButton', onBackButton);
   }
 
+  // The strips behind the status bar and navigation bar follow the page colour
+  // (white, or the dark theme's --bg). Needs the stylesheet and theme.js, so it
+  // waits for DOMContentLoaded; theme.js sends 'typoem:theme' when the theme changes.
+  function syncBars() {
+    var win = plugin('TypoemWindow');
+    var dark = isDarkTheme();
+    if (win && win.setBackground) win.setBackground({ color: pageColor(), light: !dark }).catch(function () {});
+    var bar = plugin('StatusBar');
+    if (bar) {
+      try {
+        bar.setStyle({ style: dark ? 'DARK' : 'LIGHT' }).catch(function () {});
+        bar.setBackgroundColor({ color: pageColor() }).catch(function () {});   // Android 14 and older
+      } catch (e) { /* plugin missing a method */ }
+    }
+  }
+
   setUpStatusBar();
   setUpBackButton();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncBars, { once: true });
+  else syncBars();
+  if (typeof window.addEventListener === 'function') window.addEventListener('typoem:theme', syncBars);
 
   // Start waking the server as soon as the app opens.
   trackSlow(wakeServer(), 'wake');
