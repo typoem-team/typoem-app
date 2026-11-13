@@ -386,8 +386,27 @@
     if (app && app.addListener) app.addListener('backButton', onBackButton);
   }
 
+  // The strips behind the status bar and navigation bar follow the page colour
+  // (white, or the dark theme's --bg). Needs the stylesheet and theme.js, so it
+  // waits for DOMContentLoaded; theme.js sends 'typoem:theme' when the theme changes.
+  function syncBars() {
+    var win = plugin('TypoemWindow');
+    var dark = isDarkTheme();
+    if (win && win.setBackground) win.setBackground({ color: pageColor(), light: !dark }).catch(function () {});
+    var bar = plugin('StatusBar');
+    if (bar) {
+      try {
+        bar.setStyle({ style: dark ? 'DARK' : 'LIGHT' }).catch(function () {});
+        bar.setBackgroundColor({ color: pageColor() }).catch(function () {});   // Android 14 and older
+      } catch (e) { /* plugin missing a method */ }
+    }
+  }
+
   setUpStatusBar();
   setUpBackButton();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncBars, { once: true });
+  else syncBars();
+  if (typeof window.addEventListener === 'function') window.addEventListener('typoem:theme', syncBars);
 
   // Start waking the server as soon as the app opens.
   trackSlow(wakeServer(), 'wake');
