@@ -1,7 +1,7 @@
 {
   "name": "typoem-app",
   "version": "1.0.0",
-  "description": "Typoem Android app (Capacitor wrapper around the Typoem web screens)",
+  "description": "Typoem Android 앱 — 친구들과 함께 영어 시와 소설을 읽고 생각을 나누는 공간",
   "scripts": {
     "sync": "node scripts/sync-web.mjs && cap sync android",
     "sync:local": "WEB_DIR=../typoem-web node scripts/sync-web.mjs && cap sync android",
