@@ -2,4 +2,8 @@
 <resources>
     <!-- the paper colour: the "bg" design token of the web screens -->
     <color name="typoem_paper">#FFFFFF</color>
+    <!-- home screen widget: Design.md 1장 (color-bg, color-ink, color-ink-2); dark in values-night -->
+    <color name="widget_bg">#FFFFFF</color>
+    <color name="widget_ink">#28383C</color>
+    <color name="widget_ink_2">#4F6568</color>
 </resources>

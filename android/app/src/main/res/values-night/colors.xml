@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- home screen widget, dark: Design.md 1장 다크 값 (color-bg, color-ink, color-ink-2) -->
+    <color name="widget_bg">#161E20</color>
+    <color name="widget_ink">#E6EEEA</color>
+    <color name="widget_ink_2">#A9BCBA</color>
+</resources>
