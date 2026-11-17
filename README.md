@@ -3,6 +3,7 @@
 [Typoem](https://github.com/typoem-team/typoem-web)의 Android 앱입니다. 친구들과 함께 영어 시와 소설을 읽는 서비스를 휴대폰에서 이용할 수 있습니다.
 
 **[최신 APK 내려받기](https://github.com/typoem-team/typoem-app/releases/latest)** (Android 7.0 이상)
+**[원스토어에서 다운 받기](https://m.onestore.co.kr/v2/ko-kr/search?keyword=typoem)** (Android 7.0 이상)
 
 앱은 [Capacitor](https://capacitorjs.com/)로 만들었습니다. 화면은 웹과 같으며, 앱에서는 아래 기능을 추가로 제공합니다.
 
