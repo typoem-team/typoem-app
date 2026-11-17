@@ -22,6 +22,8 @@
 - 패키지 이름: `com.typoem.app`
 - 서버: https://typoem-app.onrender.com
 - 최소 지원 버전: Android 7.0 (API 24)
+- 개인정보처리방침: https://typoem-app.onrender.com/privacy.html
+- 문의: sihyun050305@gmail.com
 
 ## 팀
 
