@@ -6,8 +6,7 @@
     "sync": "node scripts/sync-web.mjs && cap sync android",
     "sync:local": "WEB_DIR=../typoem-web node scripts/sync-web.mjs && cap sync android",
     "open": "cap open android",
-    "test": "node scripts/test-back-button.mjs && node scripts/test-fetch-retry.mjs",
-    "assets": "node scripts/build-assets.mjs"
+    "test": "node scripts/test-back-button.mjs && node scripts/test-fetch-retry.mjs"
   },
   "repository": {
     "type": "git",
@@ -29,7 +28,6 @@
     "@capacitor/status-bar": "^8.0.4"
   },
   "devDependencies": {
-    "@capacitor/assets": "^4.0.0",
     "@capacitor/cli": "^8.6.0"
   },
   "private": true
