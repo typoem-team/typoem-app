@@ -15,23 +15,6 @@
 | 공유 | 초대 코드를 카카오톡 등 다른 앱으로 보냅니다. |
 | 기기 연동 | 테마에 맞춘 상태 표시줄, Android 뒤로 가기 버튼, 진동 피드백을 지원합니다. |
 
-## 빌드 방법
-
-Node.js 20 이상, Android Studio, JDK 21이 필요합니다.
-
-```bash
-npm install
-npm run sync      # 웹 저장소의 화면을 가져와 Android 프로젝트에 반영합니다
-npm run open      # Android Studio에서 프로젝트를 엽니다
-```
-
-Android Studio에서 실행(▶)하면 휴대폰이나 에뮬레이터에 설치됩니다.
-
-테스트는 다음 명령으로 실행합니다.
-
-```bash
-npm test
-```
 
 ## 정보
 
